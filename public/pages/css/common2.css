@@ -1,0 +1,77 @@
+*{
+    padding: 0;
+    margin: 0;
+}
+@page { margin: 0px;size: auto; }
+.content{
+    padding: 0 30px;
+    font-size: 16px;
+}
+.report_title{
+   margin-top: 40px;
+}
+.report_title .title{
+    font-size: 36px;
+    font-weight: bold;
+    text-align: center;
+    padding-bottom: 20px;
+}
+.report_title .examType{
+    font-size: 16px;
+    text-align: center;
+}
+.name{
+    text-decoration: underline;
+}
+.lineHeight{
+    /* height: 30px;
+    line-height: 30px; */
+}
+#main{
+    width: 800px;
+    height:300px;
+    /* margin: 0 auto */
+
+}
+.shuzi{
+    margin-top: 20px;
+}
+.shuzi .title{
+    height: 25px;
+    line-height: 25px;
+}
+.mm{
+    outline: none;
+    border: none;
+}
+table tr td{
+    border:solid 1px #666;
+    text-align: center;
+}
+.tus_sucss{
+   
+    width: 100px;
+    height: 40px;
+    text-align: center;
+    line-height: 40px;
+    /* border: solid 1px #666; */
+    border-radius: 5px;
+    position: absolute;
+    color:#fff;
+    left: 47%;
+    top: 20%;
+
+}
+.tus_sucssbg{
+    background:#67c23a;
+}
+.tus_errorbg{
+    background: #f56c6c;
+}
+.none{
+    display: none
+}
+.btnsize{
+    width: 50px;
+    height: 25px;
+}

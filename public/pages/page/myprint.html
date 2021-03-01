@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html>
+    <header>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" type="text/css" href="../css/common.css" class="commonCss" />
+        <script src="../js/vue.js"></script>
+        <script src="../js/jquery-1.11.3.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../js/common.js"></script>
+        <meta charset="UTF-8">
+        <title></title>
+        <style type="text/css">
+            @page {
+                margin: 1cm;
+                size: A4;
+            }
+            .split-page {
+                break-after: page;
+            }
+            .before-print{
+                margin-left: 36px; margin-right: 36px; margin-top:48px;
+            }
+            @media screen {
+                div.divFooter {
+                    display: none;
+                }
+            }
+            @media print {
+                div.divFooter {
+                    position: fixed;
+                    bottom: 0;
+                }
+            }
+        </style>
+    </header>
+    <body>
+    
+        <div id="printpage" :class="{'before-print':ifnone}">
+            <div>
+                    <div v-if="ifnone" :class="{dialogheader:true,clear:true}">
+                            <!-- <div>
+                               请使用A4纸张打印 &#X3000;按所在级+专业生成，进行打印 
+                            </div> -->
+                            <div class="btnbox">
+                                    <input type="button" @click="goback()" value="返回">
+                                    <input type="button" @click="Print()" value="打印">
+                            </div>
+                        </div>
+                        <div  class="printcontent" >
+                            <div class="title">
+                               汕头大学医学院课程成绩登记表
+                            </div>
+                        </div>
+               
+                   
+                    <div  v-for="(ScoreRecordDetails,index) in scoresheet" :key="index" >
+                            <div class="printcontent" > 
+                                <p class="text" style="text-align: center;">
+                                    <span  class="subTime1">{{ScoreRecordDetails.grade}}级-{{ScoreRecordDetails.majorName}}专业 &#X3000;（{{ScoreRecordDetails.termName}}）</span>
+                                    <span class="subTime">提交日期:{{ScoreRecordDetails.submitDate | formatDate}}</span>
+                                </p>
+                                <table  style=" border-collapse: collapse;" width="100%" class="tab1">
+                                    <tr>
+                                        <td class="title1">课程名称</td>
+                                        <td class="curriculumName" colspan="2">{{ScoreRecordDetails.courseName}}</td>
+                                        <td v-if="ScoreRecordDetails.examTypeCode=='DYKS'" >考试性质</td>
+                                        <td class="title1" v-else>课程英文名称</td>
+                                        <td class="curriculumName" colspan="2" v-if="ScoreRecordDetails.examTypeCode=='DYKS'||ScoreRecordDetails.examTypeCode=='GJKS'">
+                                            <template>
+                                                <input type="checkbox" disabled="disabled" checked>正常</input>
+                                                <input type="checkbox" disabled="disabled">补考</input>
+                                            
+                                            </template>
+                                        </td>
+                                        <td  class="curriculumName" colspan="2" v-else>{{ScoreRecordDetails.courseEnName}}</td>
+                                    </tr>
+                                     <tr v-if="ScoreRecordDetails.examTypeCode!='DYKS'||ScoreRecordDetails.examTypeCode!='JXK'"  >
+                                        <td class="title1">课程学分</td>
+                                        <td  colspan="2">
+                                            {{ScoreRecordDetails.courseCredit}}
+                                        </td>
+                                        <td class="title1"> 课程学时</td>
+                                        <td  colspan="2">{{ScoreRecordDetails.learningHour}}</td>
+                                    
+                                    </tr>
+
+                                    <tr v-if="ScoreRecordDetails.examTypeCode=='XN'||ScoreRecordDetails.examTypeCode=='GJKS'">
+                                        <td class="title1">课程性质</td>
+                                        <td  colspan="2">
+                                            <template v-if="ScoreRecordDetails.examTypeCode!='GJKS'">
+                                                <input type="checkbox" disabled="true" :checked="ScoreRecordDetails.sumeryScores[0].courseNature=='XX'">选修</input>
+                                                <input type="checkbox" disabled="true" :checked="ScoreRecordDetails.sumeryScores[0].courseNature=='BX'">必修</input>
+                                              
+                                            </template>
+                                            <template v-else>
+                                                <input type="checkbox" disabled="true" :checked="ScoreRecordDetails.courseNature=='XX'">选修</input>
+                                                <input type="checkbox"  disabled="true" :checked="ScoreRecordDetails.courseNature=='BX'">必修</input>
+                                            </template>
+                                        </td>
+                                        <td>考试性质</td>
+                                        <td  colspan="2">
+                                            <template>
+                                                <input type="checkbox" disabled="disabled" checked>正常</input>
+                                                <input type="checkbox" disabled="disabled">补考</input>
+                                              
+                                            </template>
+                                        </td>
+                                    </tr>
+
+                                    <tr  v-if="ScoreRecordDetails.examTypeCode!='DYKS'||ScoreRecordDetails.examTypeCode!='JXK'||ScoreRecordDetails.examTypeCode!='GJKS'">
+                                        <td class="title1">成绩评定方式</td>
+                                        <td colspan="5">
+                                            当前阶段/课程阶段：{{ScoreRecordDetails.stageName}}
+                                         
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <p class="printtltle" v-if="ScoreRecordDetails.examTypeCode=='DYKS'||ScoreRecordDetails.examTypeCode=='JXK'">
+                                考试情况报告单-分数分布
+                         
+                            </p>
+                            <table style=" border-collapse: collapse;"  width="100%" class="tab2" v-if="ScoreRecordDetails.examTypeCode=='DYKS'||ScoreRecordDetails.examTypeCode=='JXK'">
+                                <tr>
+                                    <td>项目</td>
+                                    <td>参考人数</td>
+                                    <td>优秀
+                                        <P>90分以上</p>
+                                    </td>
+                                    <td>及格
+                                        <P>60分以上</p>
+                                    </td>
+                                    <td>不及格
+                                        <P>60分以下</p>
+                                    </td>
+                                    <td>&lt;40</td>
+                                    <td>40~</td>
+                                    <td>50~</td>
+                                    <td>60~</td>
+                                    <td>70~</td>
+                                    <td>80~</td>
+                                    <td>90~</td>
+                                
+                                </tr>
+                                <tr>
+                                    <template v-if="ScoreRecordDetails.noxnStructs.length > 0">
+                                        <td>人数</td>
+                                        <td>{{ScoreRecordDetails.noxnStructs[0].sumStudentQTY}}</td>
+                                        <td>{{ScoreRecordDetails.noxnStructs[0].youxiu}}</td>
+                                        <td>{{ScoreRecordDetails.noxnStructs[0].jige}}</td>
+                                        <td>{{ScoreRecordDetails.noxnStructs[0].bujige}}</td>
+                                        <td>{{ScoreRecordDetails.noxnStructs[0].s0}}</td>
+                                        <td>{{ScoreRecordDetails.noxnStructs[0].s40}}</td>
+                                        <td>{{ScoreRecordDetails.noxnStructs[0].s50}}</td>
+                                        <td>{{ScoreRecordDetails.noxnStructs[0].s60}}</td>
+                                        <td>{{ScoreRecordDetails.noxnStructs[0].s70}}</td>
+                                        <td>{{ScoreRecordDetails.noxnStructs[0].s80}}</td>
+                                        <td>{{ScoreRecordDetails.noxnStructs[0].s90}}</td>
+                                    </template>
+                                    <template v-else>
+                                        <td>人数</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                    </template>
+                                </tr>
+                                <tr>
+                                    <td>比例</td>
+                                    <td>{{ScoreRecordDetails.noxnStructs[0].sumStudentQTY | calcRate(ScoreRecordDetails.noxnStructs[0].sumStudentQTY)}}</td>
+                                    <td>{{ScoreRecordDetails.noxnStructs[0].youxiu | calcRate(ScoreRecordDetails.noxnStructs[0].sumStudentQTY)}}</td>
+                                    <td>{{ScoreRecordDetails.noxnStructs[0].jige | calcRate(ScoreRecordDetails.noxnStructs[0].sumStudentQTY)}}</td>
+                                    <td>{{ScoreRecordDetails.noxnStructs[0].bujige | calcRate(ScoreRecordDetails.noxnStructs[0].sumStudentQTY)}}</td>
+                                    <td>{{ScoreRecordDetails.noxnStructs[0].s0 | calcRate(ScoreRecordDetails.noxnStructs[0].sumStudentQTY)}}</td>
+                                    <td>{{ScoreRecordDetails.noxnStructs[0].s40 | calcRate(ScoreRecordDetails.noxnStructs[0].sumStudentQTY)}}</td>
+                                    <td>{{ScoreRecordDetails.noxnStructs[0].s50 | calcRate(ScoreRecordDetails.noxnStructs[0].sumStudentQTY)}}</td>
+                                    <td>{{ScoreRecordDetails.noxnStructs[0].s60 | calcRate(ScoreRecordDetails.noxnStructs[0].sumStudentQTY)}}</td>
+                                    <td>{{ScoreRecordDetails.noxnStructs[0].s70 | calcRate(ScoreRecordDetails.noxnStructs[0].sumStudentQTY)}}</td>
+                                    <td>{{ScoreRecordDetails.noxnStructs[0].s80 | calcRate(ScoreRecordDetails.noxnStructs[0].sumStudentQTY)}}</td>
+                                    <td>{{ScoreRecordDetails.noxnStructs[0].s90 | calcRate(ScoreRecordDetails.noxnStructs[0].sumStudentQTY)}}</td>
+                                </tr>
+                            </table>
+                            <p class="printtltle">
+                                考试情况报告单-考场记录
+                            </p>
+                            <table  width="100%" class="tab2" style=" border-collapse: collapse;">
+                                <tr>
+                                    <td>项目</td>
+                                    <td>参考人数</td>
+                                    <td>优秀
+                                        <div>90分以上</div>
+                                    </td>
+                                    <td>及格
+                                        <div>60分以上</div>
+                                    </td>
+                                    <td>不及格
+                                        <div>60分以下</div>
+                                    </td>
+                                    <td>正常参考</td>
+                                    <td>缺考人数</td>
+                                    <td>缓考人数</td>
+                                    <td>违纪人数</td>
+                                    <td>作弊人数</td>
+                                </tr>
+                                <tr>
+                                    
+                                    <template v-if="ScoreRecordDetails.sumeryScores.length > 0">
+                                        
+                                        <td>人数</td>
+                                        <td>{{ScoreRecordDetails.sumeryScores[0].sumStudentQTY}}</td>
+                                        <td>{{ScoreRecordDetails.sumeryScores[0].youxiu}}</td>
+                                        <td>{{ScoreRecordDetails.sumeryScores[0].jige}}</td>
+                                        <td>{{ScoreRecordDetails.sumeryScores[0].bujige}}</td>
+                                        <td>{{ScoreRecordDetails.sumeryScores[0].zhengchang}}</td>
+                                        <td>{{ScoreRecordDetails.sumeryScores[0].quekao}}</td>
+                                        <td>{{ScoreRecordDetails.sumeryScores[0].huankao}}</td>
+                                        <td>{{ScoreRecordDetails.sumeryScores[0].weiji}}</td>
+                                        <td>{{ScoreRecordDetails.sumeryScores[0].zuobi}}</td>
+                                    </template>
+                                    <template v-else>
+                                        <td>人数</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                    </template>
+                                </tr>
+                                <tr>
+                                    <template v-if="ScoreRecordDetails.sumeryScores.length > 0">
+                                        <td>比例</td>
+                                        <td>{{ScoreRecordDetails.sumeryScores[0].sumStudentQTY | calcRate(ScoreRecordDetails.sumeryScores[0].sumStudentQTY)}}</td>
+                                        <td>{{ScoreRecordDetails.sumeryScores[0].youxiu | calcRate(ScoreRecordDetails.sumeryScores[0].sumStudentQTY)}}</td>
+                                        <td>{{ScoreRecordDetails.sumeryScores[0].jige | calcRate(ScoreRecordDetails.sumeryScores[0].sumStudentQTY)}}</td>
+                                        <td>{{ScoreRecordDetails.sumeryScores[0].bujige | calcRate(ScoreRecordDetails.sumeryScores[0].sumStudentQTY)}}</td>
+                                        <td>{{ScoreRecordDetails.sumeryScores[0].zhengchang | calcRate(ScoreRecordDetails.sumeryScores[0].sumStudentQTY)}}</td>
+                                        <td>{{ScoreRecordDetails.sumeryScores[0].quekao | calcRate(ScoreRecordDetails.sumeryScores[0].sumStudentQTY)}}</td>
+                                        <td>{{ScoreRecordDetails.sumeryScores[0].huankao | calcRate(ScoreRecordDetails.sumeryScores[0].sumStudentQTY)}}</td>
+                                        <td>{{ScoreRecordDetails.sumeryScores[0].weiji | calcRate(ScoreRecordDetails.sumeryScores[0].sumStudentQTY)}}</td>
+                                        <td>{{ScoreRecordDetails.sumeryScores[0].zuobi | calcRate(ScoreRecordDetails.sumeryScores[0].sumStudentQTY)}}</td>
+                                    </template>
+                                    <template v-else>
+                                        <td>比例</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                    </template>
+                                </tr>
+                            </table>
+                            
+                            <template   v-for="list in ScoreRecordDetails.studentScores">
+                                <p class="printtltle">
+                                    {{list.administrativeClassName}} 学生总数：{{list.studentScores.length}} 成绩类型：{{ScoreRecordDetails.scoreTypeName}}
+                                </p>
+                                <table style="border-collapse: collapse; width: 100%;" class="tab2">
+                                    <thead>
+                                        <tr>
+                                            <td width="90">学号</td>
+                                            <td>姓名</td>
+                                            <td width="40">成绩</td>
+                                            <td width="90">学号</td>
+                                            <td>姓名</td>
+                                            <td width="40">成绩</td>
+                                            <td width="90">学号</td>
+                                            <td>姓名</td>
+                                            <td width="40">成绩</td>
+                                            <td width="90">学号</td>
+                                            <td>姓名</td>
+                                            <td width="40">成绩</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="(row, idx) in list.layout">
+                                            <template v-for="cell in row">
+                                                <td>{{cell.studentNo}}</td>
+                                                <td>{{cell.studentName}}</td>
+                                                <td>{{cell.score}}</td>
+                                            </template>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <!--
+                                <div ref="carouselheight" style="display:flex" >
+                                    <table style=" border-collapse: collapse;width: 25%" class="tab2" >
+                                            <tr>
+                                                <td style="width: 20%">学号</td>
+                                                <td>姓名</td>
+                                                <td  style="width: 20%">成绩</td>
+                                            </tr>    
+                                            <template v-if="list.mytabel1.length>0">
+                                            <tr v-for="(lis, idx) in list.mytabel1" :class="idx==19 ? 'split-page' : ''">
+                                                <td >{{lis.studentNo}}</td>
+                                                <td>{{lis.studentName}}</td>
+                                                <td>{{lis.score}}</td>
+                                            </tr>
+                                            </template>
+                                            <template v-else>
+                                            <tr>
+                                                <td >-</td>
+                                            <td >-</td>
+                                                <td >-</td>
+                                            </tr>
+                                            </template>
+                                    </table>
+                                    <table style=" border-collapse: collapse;width: 25%" class="tab2" >
+                                        <tr>
+                                            <td  style="width: 20%">学号</td>
+                                            <td>姓名</td>
+                                            <td  style="width: 20%">成绩</td>
+                                           
+                                        </tr>
+                                        <template v-if="list.mytabel2.length>0">
+                                            <tr v-for="(lis,idx) in list.mytabel2" :class="idx==19 ? 'split-page' : ''">
+                                                <td >{{lis.studentNo}}</td>
+                                                <td>{{lis.studentName}}</td>
+                                                <td>{{lis.score}}</td>
+                                            </tr>
+                                        </template>
+                                        <template v-else>
+                                            <tr>
+                                                <td >-</td>
+                                            <td >-</td>
+                                                <td >-</td>
+                                            </tr>
+                                        </template>
+                                    </table>
+                                    <table style=" border-collapse: collapse;width: 25%" class="tab2" >
+                                        <tr>
+                                            <td  style="width: 20%">学号</td>
+                                            <td>姓名</td>
+                                            <td  style="width: 20%">成绩</td>
+                                            
+                                        </tr>
+                                        <template v-if="list.mytabel3.length>0">
+                                            <tr v-for="(lis,idx) in list.mytabel3" :class="idx==19 ? 'split-page' : ''">
+                                                <td >{{lis.studentNo}}</td>
+                                                <td>{{lis.studentName}}</td>
+                                                <td>{{lis.score}}</td>
+                                            </tr>
+                                        </template>
+                                        <template v-else>
+                                            <tr>
+                                                <td >-</td>
+                                            <td >-</td>
+                                                <td >-</td>
+                                            </tr>
+                                        </template>
+                                    </table>
+                                    <table style=" border-collapse: collapse;width: 25%" class="tab2" >
+                                        <tr>
+                                            <td style="width: 20%">学号</td>
+                                            <td>姓名</td>
+                                            <td style="width: 20%">成绩</td>
+                                           
+                                        </tr>
+                                        <template v-if="list.mytabel4.length>0">
+                                            <tr v-for="(lis,idx) in list.mytabel4" :class="idx==19 ? 'split-page' : ''">
+                                                <td >{{lis.studentNo}}</td>
+                                                <td>{{lis.studentName}}</td>
+                                                <td>{{lis.score}}</td>
+                                            </tr>
+                                            <tr v-for="item in gezi">
+                                                <td></td>
+                                                 <td></td>
+                                                  <td></td>
+                                             </tr>
+                                        </template>
+                                        <template v-else>
+                                            <tr>
+                                                <td >-</td>
+                                                <td >-</td>
+                                                <td >-</td>
+                                            </tr>
+                                        </template>
+                                    </table>
+                                </div>
+                                -->
+
+                                <!-- <div class="xqStyle" v-if="scoreTypeName!='课程成绩'&&scoreTypeName!='阶段成绩'"> -->
+
+                                <!-- </div> -->
+                            </template>                         
+                    </div>
+                    <div class="topStyle printtltle" style="line-height: 30px;">考场情况</div>
+                    <template v-if="xiangqing.length>0">
+                        <table  class="topStyleBox" style=" border-collapse: collapse;">
+                            <thead>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="talbeSyle" v-for="item in xiangqing">
+                                    <td>{{item.unusual_type}}</td>
+                                    <td>
+                                        <div class="box">{{item.unusual_detail}}</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </template>
+                    <div style="display:flex;">
+                        <div style="width:50%;">
+                            <p>任课、监考考试签字:</p>
+                            <p>日期:</p>
+                        </div>
+                        <div style="width:50%;">
+                            <p>教研室主任、课程负责人签字:</p>
+                            <p>日期:</p>
+                        </div>
+                    </div>
+            </div>
+            <div class="divFooter"></div>
+        </div>
+    </body>
+    <script>
+        var vm = new Vue({
+            el:"#printpage",
+            data:function(){
+                return{
+                    token:'',
+                    scoresheet:[],
+                    xiangqing: [],
+                    ScoreRecordDetails:"",//成绩详情
+                    cmd:'',
+                    ifnone:true,//印的时候变为false
+                    scoreTypeName:'',
+                    contentHeight:'',
+                    newobj:{
+                        row:{
+                            course: 501,
+                            courseName: "刘钧测试课程3",
+                            createTime: "2019-07-09",
+                            createUser: 0,
+                            examTypeCode: "XN",
+                            id: 2572,
+                            lastUpdateTime: "2019-07-09 08:57:52",
+                            lastUpdateUser: 0,
+                            major: 138,
+                            majorName: "刘钧专业4",
+                            remark: "测试数据",
+                            resit: 0,
+                            resitListId: null,
+                            scoreTypes: [
+                                {code: "X5", id: 73,name: "考勤成绩"},
+                                {code: "X3",id: 58,name: "实验成绩"},
+                                {code: "X4",id: 60,name: "期末成绩"},
+                                {code: "X1",id: 62,name: "平时成绩"}
+                            ],
+                            status: 1,
+                            studentNum: 10,
+                            termId: 295,
+                            termName: "2019-2020学年第一学期",
+                        },
+                        scoreType: null,
+                         type: "stage"
+                    },
+                 
+                    
+                }
+            },
+            filters: {
+                calcRate(a, b) {
+                    var c = a / b;
+                    return (Math.round(c * 10000)/100).toFixed(2) + '%';
+                },
+
+                formatDate(v) {
+                    if (v != '') {
+                        return v.substring(0, 10);
+                    }
+                    return v
+                }
+            },
+            created: function() {
+                let cmdstr = GetQueryString("cmd");
+                let token = GetQueryString("token");
+                let cmd = JSON.parse(decodeURI(cmdstr));
+                this.token = decodeURI(token);
+                console.info(this.token);
+                this.onlogSheetExt(cmd);
+            },
+            mounted:function(){
+                // let aaa = GetQueryString('cmd')
+                // console.log(aaa)
+                // this.cmd = this.newobj
+                // this.token = localStorage.getItem('token')
+                // this.onlogSheetExt(this.cmd)
+            },
+            methods:{
+                goback(){
+                    window.history.back(-1); 
+                },
+                onlogSheetExt(cmd){
+                    var scoreTypeName;
+                    var requestUrl = '';
+                    let sct = cmd.scoreType == null ? 0 : cmd.scoreType.id;
+                    
+                    if (cmd.type == 'course') {
+                        scoreTypeName = "课程成绩";
+                        requestUrl = `/score/management/scoreRecord/queryScoreRecordDetails/${cmd.type}/${sct}/${cmd.recordId}`;
+                    } else if (cmd.type == 'stage') {
+                        scoreTypeName = "阶段成绩";
+                        requestUrl = `/score/management/scoreRecord/queryScoreRecordDetails/${cmd.type}/${sct}/${cmd.recordId}`;
+                    } else if (cmd.type == "GJKS") {
+                        scoreTypeName = "国家考试";
+                        requestUrl = `/score/management/scoreRecord/queryScoreRecordDetails/${cmd.recordId}`;
+                    } else if (cmd.type == "DYKS") {
+                        scoreTypeName = "德育考试"
+                        requestUrl = `/score/management/scoreRecord/queryScoreRecordDetails/${cmd.recordId}`;
+                    } else if (cmd.type == "JXK") {
+                        scoreTypeName = "教学课考试"
+                        requestUrl = `/score/management/scoreRecord/queryScoreRecordDetails/${cmd.recordId}`;
+                    } else {
+                        scoreTypeName = cmd.scoreType.name;
+                        requestUrl = `/score/management/scoreRecord/queryScoreRecordDetails/${cmd.type}/${sct}/${cmd.recordId}`;
+                    }
+                    
+                    this.scoreTypeName = scoreTypeName
+                    // const loading = this.$loading({
+                    //     lock: true,
+                    //     text: "导入中...",
+                    //     spinner: 'el-icon-loading',
+                    //     background: 'rgba(0, 0, 0, 0.7)'
+                    // });
+                    if (cmd.resit == 1) {
+                        this.courseName = cmd.row.courseName;
+                        if (cmd.resitListId) {
+                            this.getresitList(cmd.resitListId);
+                            // loading.close();
+                        }
+                    } else {
+                        let self = this;
+                        
+                        let headers = {
+                            'Authorization': this.token
+                        }
+                        
+                        let url = 
+                        this.getDetails(cmd.recordId,sct)
+                
+                        // $.get(url,headers={ 'Authorization':this.token},
+                        //     function (data) {
+                        //         // console.log(res, 'time')
+                        //     data.data.scoreTypeName = scoreTypeName;
+                        //     data.data.studentScores = this.fnScoreRecord(data.data.studentScores);
+                        //     this.scoresheet.splice(0);
+                        //     this.scoresheet.push(data.data);
+                        //     console.info(this.scoresheet);
+                        // })
+                        $.ajax({
+                          url:requestUrl,
+                            beforeSend: function(xhr) {
+                                xhr.setRequestHeader("Authorization", self.token);
+                                console.info("add authorizaiton: ", self.token);
+                            },
+                            dataType: 'JSON',
+                            type: 'GET',
+                            success: function (data) {
+                                data.data.scoreTypeName = scoreTypeName;
+                                data.data.studentScores = self.fnScoreRecord(data.data.studentScores);
+                                self.scoresheet.splice(0);
+                                self.scoresheet.push(data.data);
+                                console.info(self.scoresheet);
+                            },
+                            error: function () {
+                            }
+                        });
+                    }
+                    
+                },
+            fnScoreRecord(arr){
+                let totalrow=0
+                let totclass = arr.length;
+                let arr2 = []
+                let step = 4;
+                for(let i=0;i<arr.length;i++){
+                    arr[i].layout = new Array();
+                    let leth = Math.ceil(arr[i].studentScores.length/4)
+                    let qmoth = Math.floor(arr[i].studentScores.length%4)
+                    let start = 0;
+                    let pieces = 4;
+                    let loop = Math.ceil(arr[i].studentScores.length / step);
+                    for (var x = 0; x < loop; x++) {
+                        arr[i].layout.push(arr[i].studentScores.slice(start, pieces));
+                        start = start + step;
+                        pieces = pieces + step;
+                        if (pieces > arr[i].studentScores.length) pieces = arr[i].studentScores.length;
+                    }
+                    for(var x = arr[i].layout[arr[i].layout.length - 1].length; x < 4; x++) {
+                        arr[i].layout[arr[i].layout.length - 1].push({});
+                    }
+                    
+                    // if(arr[i].studentScores.length>0){
+                    //     arr[i].mytabel1 = arr[i].studentScores.slice(0,leth)
+                    //     console.log(arr[i].mytabel1.length,'3434')
+                    //     totalrow += arr[i].mytabel1.length
+                    //     totalrow = totalrow*totclass+1
+                    // }else{
+                    //      arr[i].mytabel1= []
+                    // } 
+                  
+                    // if(arr[i].studentScores.length>1){
+                    //     arr[i].mytabel2 = arr[i].studentScores.slice(leth,2*leth)
+                    // }else{
+                    //      arr[i].mytabel2= []
+                    // }
+                    // if(arr[i].studentScores.length>2){
+                    //     arr[i].mytabel3 = arr[i].studentScores.slice(2*leth,3*leth)
+                    // }else{
+                    //      arr[i].mytabel3= []
+                    // }
+                    // if(arr[i].studentScores.length>3){
+                    //     arr[i].mytabel4 = arr[i].studentScores.slice(3*leth,4*leth)
+                    //     // 第四个空出来的格子数
+                       
+                   
+                    //     this.gezi = arr[i].mytabel3.length-arr[i].mytabel4.length
+
+                    //     console.log( arr[i].mytabel4,'第四个空出来的格子数')
+                    // }else{
+                    //      arr[i].mytabel4= []
+                    // }
+                    // arr2.push(arr)
+                }
+                this.contentHeight = (totalrow+13)*40+10+'px'
+                console.log( this.contentHeight)
+                console.info("布局数组:", arr);
+                // console.log(arr,'返回')
+                return arr
+            },
+                getresitList(id){ //补考的记载表
+                    let self =this;
+                    let headers = {
+                            'Authorization':self.token
+                    }
+                    // let resitListId = id;
+                    // $.get('/score/management/resitList/'+resitListId,
+                    //         function (data) {
+                    //             self.tableData2 = data.data;
+                                
+                    //             self.examstageName = data.data.stageName;
+                    //             self.printDialog2 = true;
+                    // })
+
+                    $.ajax({
+                         url:'/score/management/resitList/'+resitListId,
+                      
+                        beforeSend: function(request) {
+                        request.setRequestHeader("Authorization", self.token);
+                        },
+                         dataType: 'JSON',
+                    
+                         type: 'GET',
+                         success: function (data) {
+                            self.tableData2 = data.data;
+                            self.examstageName = data.data.stageName;
+                            self.printDialog2 = true;
+                         },
+                         error: function () {
+                         }
+                    });
+               
+                },
+                getDetails(recordId,scoreTypeId){
+                    let headers = {
+                            'Authorization':this.token
+                    }
+                    console.log('参数1', recordId)
+                    console.log('参数2', scoreTypeId)
+                    // $.get("/score/management/scoreRecord/getScoreRecordArea/"+recordId+"/"+scoreTypeId,
+                    //     function (data) {
+                    //         this.xiagnqing=data.data;
+                    // })
+                    var self = this;
+                    $.ajax({
+                        url:"/score/management/scoreRecord/getScoreRecordArea/"+recordId+"/"+scoreTypeId,
+                        beforeSend: function(request) {
+                            request.setRequestHeader("Authorization", self.token);
+                        },
+                         dataType: 'JSON',
+                         type: 'GET',
+                         success: function (data) {
+                            self.xiangqing=data.data;
+                            console.info("详情:", self.xiangqing);
+                         },
+                         error: function () {
+                         }
+                    });
+                  
+                },
+                Print(){
+                    let self = this
+                    self.ifnone = false
+                    setTimeout(()=>{
+                        window.print();
+                
+                    },100)
+                    window.onafterprint = function() {
+                        self.ifnone = true;
+                    };
+                },
+            }
+        })
+
+    </script>
+</html>

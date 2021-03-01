@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html>
+    <header>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" type="text/css" href="../css/common2.css" class="commonCss" />
+        <script src="../js/vue.js"></script>
+        <script src="../js/jquery-1.11.3.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../js/common.js"></script>
+        <script src="../js/web_chart.js"></script>
+        <script src="../js/echarts.js"></script>
+      
+        <meta charset="UTF-8">
+        <title>成绩分析报告</title>
+    </header>
+    <body>
+    
+        <div id="printpage1">
+            <div class="content">
+                <div class="">
+                    <div :class="{tus_sucss:true,none:isshow,tus_sucssbg:tusisuccs,tus_errorbg:tusierror}">
+                        {{tusitext}}
+                    </div>
+                    
+                </div>
+                <div class="report_title">
+                        <div v-if="showButton" style="text-align: right">
+                            <input class="btnsize" type="button" @click="back" value="返回">
+                            <input class="btnsize" type="button" @click="save" value="保存">
+                            <input  class="btnsize" type="button" @click="Print" value="打印">
+                        </div>
+                    <div class="title">汕头大学医学院考试分析报告</div>
+                    <div class="examType">{{analyzeData.studentInfo.scoreTypeName}}</div>
+                </div>
+                <br/>
+                <div >
+                    <p class="lineHeight">
+                        课程名称 <span class="name">{{analyzeData.examInfo.courseName}}</span>
+                        考试日期 <span  class="name">{{analyzeData.studentInfo.examTime}}</span>
+                        授课科室 <span  class="name">{{analyzeData.studentInfo.teachingDepartment}}</span>
+                    </p>
+                    <br>
+                    <p class="lineHeight">
+                        总人数 <span class="name">{{analyzeData.studentInfo.sumStudentQty}}</span>
+                        缺考人数 <span  class="name">{{analyzeData.studentInfo.quKao}}</span>
+                        缓考人数 <span  class="name">{{analyzeData.studentInfo.huanKao}}</span>
+                        免修人数 <span  class="name">{{analyzeData.studentInfo.mianXiu}}</span>
+                        休学人数 <span  class="name">{{analyzeData.studentInfo.xiuXue}}</span>
+                    </p>
+                    <br>
+                    <p class="lineHeight">
+                        年级专业 
+                        <span class="name">
+                                {{analyzeData.studentInfo.gradeAndMajors | displayMajorGrade(majors)}}
+                            <!-- 2018口腔医学5年制 2018口腔医学5年制 2018口腔医学5年制 2018口腔医学5年制 2018口腔医学5年制 2018口腔医学5年制
+                            2018口腔医学5年制 2018口腔医学5年制 2018口腔医学5年制 2018口腔医学5年制 2018口腔医学5年制 -->
+                        </span>
+                      
+                    </p>
+                    <br>
+                    <p class="lineHeight">
+                        最高分 <span class="name">{{analyzeData.studentInfo.maxScore}}</span>
+                        最底分 <span  class="name">{{analyzeData.studentInfo.minScore}}</span>
+                        平均分 <span  class="name">{{analyzeData.studentInfo.avgScore | formatFloat}}</span>
+                        标准差 <span  class="name">{{analyzeData.studentInfo.stdDev}}</span>
+                        不及格率 <span  class="name">{{analyzeData.studentInfo.bjgl}}%</span>
+                    </p>
+                
+                </div>
+                <div class="shuzi">
+                    <p  class="title">一. 分数段及分布</p>
+                    <br />
+                    <table  width="100%" style=" border-collapse: collapse;">
+                        <tr>
+                            <td class=""> 分数段 </td>
+                            <td class="">  &lt;40 </td>
+                            <td class=""> 40~ </td>
+                            <td class=""> 50~ </td>
+                            <td class=""> 60~ </td>
+                            <td class=""> 70~ </td>
+                            <td class=""> 80~ </td>
+                            <td class=""> 90~ </td>
+                          
+                        </tr>
+                        <tr >
+                            
+                            <td class=""> 人数 </td>
+                            <td class=""> {{analyzeData.studentInfo.s0040}} </td>
+                            <td class=""> {{analyzeData.studentInfo.s40}} </td>
+                            <td class=""> {{analyzeData.studentInfo.s50}} </td>
+                            <td class=""> {{analyzeData.studentInfo.s60}} </td>
+                            <td class=""> {{analyzeData.studentInfo.s70}} </td>
+                            <td class=""> {{analyzeData.studentInfo.s80}} </td>
+                            <td class=""> {{analyzeData.studentInfo.s90 + analyzeData.studentInfo.s100}} </td>
+
+                        </tr>
+                        <tr >
+                            
+                            <td class=""> 百分比 </td>
+                            <td class=""> {{analyzeData.studentInfo.s0040 | calcRate(analyzeData.studentInfo.sumStudentQty)}} </td>
+                            <td class=""> {{analyzeData.studentInfo.s40 | calcRate(analyzeData.studentInfo.sumStudentQty)}} </td>
+                            <td class=""> {{analyzeData.studentInfo.s50 | calcRate(analyzeData.studentInfo.sumStudentQty)}} </td>
+                            <td class=""> {{analyzeData.studentInfo.s60 | calcRate(analyzeData.studentInfo.sumStudentQty)}} </td>
+                            <td class=""> {{analyzeData.studentInfo.s70 | calcRate(analyzeData.studentInfo.sumStudentQty)}} </td>
+                            <td class=""> {{analyzeData.studentInfo.s80 | calcRate(analyzeData.studentInfo.sumStudentQty)}} </td>
+                            <td class=""> {{(analyzeData.studentInfo.s90 + analyzeData.studentInfo.s100) | calcRate(analyzeData.studentInfo.sumStudentQty)}} </td>
+
+                        </tr>
+                    </table>
+                </div>
+                <div class="shuzi">
+                    <p class="title">一. 成绩分布曲线</p>
+                    <div style="">
+                        <div id="main" ></div>
+                    </div>
+                    
+                </div>
+                <div class="shuzi">
+                    <p class="title">三. 考试启示 (从本次考试存在的主要问题得到的经验教训及今后的教学对策)</p>
+                    <br/>
+                    <textarea name="" id="" cols="50" rows="10" style="width: 100%;" v-model="queryParam.analyseText" :class="{mm:ediline}"></textarea>
+                </div>
+                <div class="shuzi">
+                    <div style="display:flex;">
+                        <div style="width:50%;">
+                            <p>分析人签名:</p>
+                            <p>日期:</p>
+                        </div>
+                        <div style="width:50%;">
+                            <p>教研室主任签名:</p>
+                            <p>日期:</p>
+                        </div>
+                    </div>
+                   
+                </div>
+             
+            </div>
+           
+        </div>
+    </body>
+    <script>
+        var vm = new Vue({
+            el:"#printpage1",
+            data:function(){
+                return {
+                    tusisuccs:true,
+                    tusierror:false,
+                    tusitext:'',
+                    isshow:true,
+                    ediline:false,
+                    majors:[],
+                    myChart: {},
+                    showButton: true,
+                    analyzeData: {
+                        studentInfo: {},
+                        examInfo: {},
+                    },
+                    queryParam: {},
+                    option:{
+                        xAxis: {
+                            type: 'category',
+                            boundaryGap: false,
+                            data: ['0','10', '20', '30', '40', '50', '60', '70', '80', '90', '100']
+                        },
+                        yAxis: {
+                            type: 'value'
+                        },
+                        series: [{
+                            data: [0, 0, 10, 0,20,20,20,20,30,0],
+                            type: 'line',
+                            smooth: true,
+                     
+                            symbolSize:0
+                    
+                        }]
+                    },
+                 
+                }
+            },
+            filters: {
+               calcRate(a, b) {
+                   var c = ((a / b) * 10000) / 100;
+                   return c.toFixed(2) + '%';
+                //    return (Math.round(c * 10000)/100).toFixed(2) + '%';
+               },
+               formatFloat(v) {
+                   return Number(v).toFixed(2);
+               },
+               displayMajorGrade(arr, majors) {
+                   console.log(arr)
+                   console.log(majors)
+                   var result = new Array();
+                   if (Array.isArray(arr)) {
+                       if (arr.length > 0) {
+                           arr.forEach(x => {
+                               var split = x.split(',');
+                               var ts = majors.filter(m => m.id == Number(split[1]));
+                               if (ts.length > 0) {
+                                   var dis = `${split[0]}级${ts[0].name}`;
+                                   result.push(dis);
+                               }
+                               
+                           });
+                           return result.join('、');
+                       }
+                   }
+                   return '';
+               }
+            },
+            created: function() {
+            },
+            mounted:function(){
+                let cmdstr = GetQueryString("cmd");
+                let token = GetQueryString("token");
+                let cmd = JSON.parse(decodeURI(cmdstr));
+                let examDate = new Date(cmd.examTime[0]);
+                this.analyzeData.examInfo.courseName = cmd.courseName;
+                this.analyzeData.examInfo.examDate = examDate.getFullYear() + '.' + (examDate.getMonth() + 1)+ '.' + examDate.getDay();
+                this.token = decodeURI(token);
+                this.getMajros();
+                this.myChart = echarts.init(document.getElementById('main'));
+                console.info("ECharts: ", this.myChart);
+                this.getAnalyzeData(cmd)
+                // var myChart = echarts.init(document.getElementById('main'));
+                // myChart.setOption(this.option);
+            },
+            methods:{
+                back() {
+                    window.history.back(-1);
+                },
+                save() {
+                    console.info("保存参数:", this.queryParam);
+                    let self = this;
+                    let url = `/score/management/importScore/saveAnalyse`;
+                    $.ajax({
+                        url: url,
+                        beforeSend: function(xhr) {
+                            xhr.setRequestHeader("Authorization", self.token);
+                        },
+                        contentType: "application/json;charset=utf-8",
+                        data:JSON.stringify(self.queryParam),
+                        dataType: 'JSON',
+                        type: 'POST',
+                        success: function(data) {
+                            // alert("");
+                            self.tusitext = '保存成功!'
+                            self.tusisuccs = true
+                            self.tusierror = false
+                            self.isshow = false
+                            setTimeout(function(){
+                                self.isshow = true
+                            },1000)
+                        },
+                        error: function() {
+                              self.isshow = false
+                              self.tusitext = '保存失败!'
+                              self.tusierror = true
+                              self.tusisuccs =false
+                              self.isshow = false
+                            setTimeout(function(){
+                                self.isshow = true
+                            },1000)
+                        }
+                    })
+                },
+                getAnalyzeData(cmd) {
+                    this.queryParam = cmd;
+                    console.log('分析参数：', cmd);
+                    let self = this;
+                    let url =`/score/management/importScore/analyse/`
+                    $.ajax({
+                          url:url,
+                            beforeSend: function(xhr) {
+                                xhr.setRequestHeader("Authorization", self.token);
+                            },
+                            contentType: "application/json; charset=utf-8",
+                            data:JSON.stringify(cmd),
+                            dataType: 'JSON',
+                            type: 'POST',
+                            success: function (data) {
+                                let arr = []
+                                self.analyzeData.studentInfo = data.data
+                                self.queryParam.analyseText = data.data.analyzeText;
+                                let obj = data.data
+                                arr.push(obj.s00);
+                                arr.push(obj.s10);
+                                arr.push(obj.s20);
+                                arr.push(obj.s30);
+                                arr.push(obj.s40);
+                                arr.push(obj.s50);
+                                arr.push(obj.s60);
+                                arr.push(obj.s70);
+                                arr.push(obj.s80);
+                                arr.push(obj.s90);
+                                arr.push(obj.s100);
+
+                                // 平滑处理
+                                for (var i = 0 ; i < arr.length; i++) {
+                                    if (arr[i] <= 0 && i > 0) {
+                                        var before = arr[i-1];
+                                        var next = arr[i + 1];
+                                        if (before > 0 && next > 0) {
+                                            arr[i] = Math.round((before + next) / 2);
+                                        }
+                                    }
+                                }
+                                self.option.series[0].data = arr;
+                                console.info("分析结果:", self.option);
+                                console.info('分析结果:', self.analyzeData);
+                                self.myChart.setOption(self.option);
+                                console.info("ECharts: ", self.myChart);
+
+                                // var myChart = echarts.init(document.getElementById('main'));
+                                // myChart.setOption(self.option);
+                            },
+                            error: function () {
+                            }
+                        });
+                },
+                getMajros() {
+                    let self = this;
+                    let url = '/operation/data/admin/major/combox';
+                    $.ajax({
+                        url: url,
+                        beforeSend: function(xhr) {
+                            xhr.setRequestHeader("Authorization", self.token);
+                        },
+                        contentType: "application/json; charset=utf-8",
+                        dataType: 'JSON',
+                        type: 'GET',
+                        success: function(data) {
+                            console.info(data);
+                            self.majors = data.data;
+                            console.info("专业列表：", self.majors);
+                        },
+                        error: function(err) {
+
+                        }
+                    })
+                },
+                Print(){
+                    let self = this
+                    self.showButton = false
+                    self.ediline = true
+                    setTimeout(()=>{
+                        window.print();
+                    },100)
+                    window.onafterprint = function() {
+                        self.showButton = true;
+                        self.ediline = false;
+                        window.location.reload();
+                        // setTimeout(() => {
+                        //     self.myChart = echarts.init(document.getElementById('main'));
+                        //     self.myChart.setOption(self.option);
+                        // }, 100);
+                    };
+                },
+            }
+        })
+
+    </script>
+</html>

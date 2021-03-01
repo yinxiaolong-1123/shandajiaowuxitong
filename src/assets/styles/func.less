@@ -1,0 +1,56 @@
+@import 'variable';
+.tx-center(@t:center){
+  text-align: @t;
+}
+.round(@r:5px){
+  border-radius: @r;
+}
+.bg-color(@b:#fff){
+  background-color: @b;
+}
+.clear{
+  &:before,&:after{
+    content:'';
+    display:table;
+    visibility: hidden;
+    height: 0;
+    clear: both;
+  }
+}
+.left{
+  float:left;
+}
+.right{
+  float:right;
+}
+.hide{
+  display: none
+}
+.box{
+  box-sizing: border-box;
+}
+.cell{
+  display: table-cell
+}
+.full-size{
+  width:100%;
+  height:100%;
+}
+.full-size-scroll{
+    .full-size;
+    overflow: auto;
+}
+.indent(@t:0){
+  text-indent: @t;
+}
+.flex-align-center{
+  display: flex;
+  align-items: center;
+}
+.compute-pad(@size:22px,@height:40px,@pad-side:15px){
+  padding:calc((@height - @size - 2px) / 2) @pad-side;
+  .box;
+}
+.bor-color(@b:#fff){
+  border-color:#fff;
+}
